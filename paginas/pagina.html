@@ -1,0 +1,87 @@
+﻿<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Formulario Alumno</title>
+		<link rel="stylesheet" type="text/css" href="../css/estilo.css" />
+		<script src="../js/codigo.js"></script>
+	</head>
+	<body>
+		<div class="contenedor">
+			<section>
+				<article>
+					<form id="frmficha" name="frmficha" class="formulario">
+					<table width="100%">
+						<tr>
+							<td colspan="2" class="titulo">Ficha de Alumno</td>
+						</tr>
+						<tr>
+							<td><label for="txtnombre">Nombre</label></td>
+							<td><input type="text" id="txtnombre" name="txtnombre" maxlength="25" placeholder="Nombre" class="texto"></td>
+						</tr>
+						<tr>
+							<td><label for="txtapellido">Apellido</label></td>
+							<td><input type="text" id="txtapellido" name="txtapellido" maxlength="25" placeholder="Apellido" class="texto"></td>
+						</tr>
+						<tr>
+							<td> <label for="cboeducacion">Educación</label></td>
+							<td>
+								<select  id="cboeducacion" name="cboeducacion" class="texto">
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td> <label>Nivel de Inglés</label></td>
+							<td>
+								<input type="radio" id="rbtnv1" name="nv">Básico
+								<input type="radio" id="rbtnv2" name="nv">Intermedio
+								<input type="radio" id="rbtnv3" name="nv">Avanzado
+							</td>
+						</tr>
+						<tr>
+							<td> <label>Conocimientos</label></td>
+							<td>
+								<input type="checkbox" id="chkc1" name="chkc1">HTML 5
+								<input type="checkbox" id="chkc2" name="chkc2">JavaScript
+								<input type="checkbox" id="chkc3" name="chkc3">React
+								<input type="checkbox" id="chkc4" name="chkc4">Angular JS
+								<input type="checkbox" id="chkc5" name="chkc5">Visual Studio
+								<input type="checkbox" id="chkc6" name="chkc6">PHP
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" align="center">
+								<input type="button" id="btnaceptar" name="btnaceptar" value="Aceptar" class="boton">
+								<input type="button" id="btnlimpiar" name="btnlimpiar" value="Limpiar" class="boton">
+
+							</td>
+						</tr>
+					</table>
+					</form>
+				</article>
+			</section>
+
+			<section>
+				<div id="reporte" class="reporte">
+					<div class="contenido">
+						<div class="contenido-texto"></div>
+						
+						<div class="contenido-cerrar">
+							<input type="button" id="btncerrar" name="btncerrar" value="CERRAR" class="boton" />
+						</div>
+					</div>
+				</div>
+			</section>
+			
+			<footer>
+				<table class="final">
+					<tr>
+						<td>
+							Zarela Manrique Condori &copy; 2025
+						</td>
+					</tr>
+				</table>
+			</footer>			
+		</div>
+	</body>
+</html>
