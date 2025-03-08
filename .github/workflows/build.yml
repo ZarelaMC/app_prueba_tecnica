@@ -29,6 +29,9 @@ jobs:
 
       - name: Run tests and generate coverage
         run: npx jest --coverage #ejecutar Jest sin permisos especiales
+      
+      - name: Clean SonarQube Cache
+        run: rm -rf .scannerwork
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v5
