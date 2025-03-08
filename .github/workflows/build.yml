@@ -13,8 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
-      
+          fetch-depth: 0
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -23,13 +23,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-        #Permisos para permitir ejecución de Jest en GitHub Actions
-      - name: Fix Jest permissions
-        run: chmod +x node_modules/.bin/jest
-
       - name: Run tests and generate coverage
-        run: npx jest --coverage #ejecutar Jest sin permisos especiales
-      
+        run: npx jest --coverage
+
       - name: Clean SonarQube Cache
         run: rm -rf .scannerwork
 
@@ -37,5 +33,35 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: ZarelaMC_app_prueba_tecnica
-          SONAR_ORGANIZATION: zarelamc
+          SONAR_PROJECT_KEY: "ZarelaMC_app_prueba_tecnica"
+          SONAR_ORGANIZATION: "zarelamc"
+
+      - name: Obtener resultados del análisis
+        id: sonar_check
+        run: |
+          sudo apt-get install -y jq
+          SONAR_PROJECT_KEY="ZarelaMC_app_prueba_tecnica"
+          STATUS=$(curl -s "https://sonarcloud.io/api/qualitygates/project_status?projectKey=$SONAR_PROJECT_KEY" \
+          -H "Authorization: Bearer ${{ secrets.SONAR_TOKEN }}" | jq -r '.projectStatus.status')
+          echo "SonarCloud Status: $STATUS"
+          echo "status=$STATUS" >> $GITHUB_ENV
+
+      - name: Validar resultados de SonarCloud
+        run: |
+          if [[ "$status" != "OK" ]]; then
+            echo "❌ Código no aprobado por SonarCloud. Revisión requerida."
+            exit 1
+          else
+            echo "✅ Código aprobado por SonarCloud. Continuando con el despliegue..."
+          fi
+
+      - name: Mostrar mensaje final
+        run: |
+          SONAR_PROJECT_KEY="ZarelaMC_app_prueba_tecnica"
+          echo "🎯 Análisis de SonarCloud finalizado."
+          if [[ "$status" != "OK" ]]; then
+            echo "❌ Fallos detectados en el código. Revisa SonarCloud: https://sonarcloud.io/dashboard?id=$SONAR_PROJECT_KEY"
+            exit 1
+          else
+            echo "✅ Código limpio. Puedes proceder con el despliegue."
+          fi
