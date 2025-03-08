@@ -1,0 +1,29 @@
+name: Análisis de Código con SonarCloud
+
+on:
+  push:
+    branches:
+      - "main"    
+      - "master"
+  pull_request:
+    branches:
+      - "main"    
+      - "master"
+
+jobs:
+  sonarcloud:
+    name: Analizar Código con SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del Código
+        uses: actions/checkout@v3
+
+      # Ejecutar las pruebas de compilación y análisis de SonarCloud
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v1
+        with:
+          organization: 'zarelamc'
+          projectKey: 'ZarelaMC_app_prueba_tecnica'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
