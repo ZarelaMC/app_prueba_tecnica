@@ -2,34 +2,24 @@ name: Análisis de Código con SonarCloud
 
 on:
   push:
-    branches:
-      - "main"    
+    branches:  
       - "master"
+      - "main"  
   pull_request:
     branches:
-      - "main"    
       - "master"
+      - "main"  
 
 jobs:
-  sonarcloud:
+  sonarCloudTrigger:
     name: Analizar Código con SonarCloud
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout del Código
+      - name: Clonar repositorio
         uses: actions/checkout@v3
 
-      - name: Configurar Java 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      # Ejecutar las pruebas de compilación y análisis de SonarCloud
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1
-        with:
-          organization: 'zarelamc'
-          projectKey: 'ZarelaMC_app_prueba_tecnica'
+      - name: Analizar con SonarCloud
+        uses: sonarsource/sonarcloud-github-action@v1.3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
