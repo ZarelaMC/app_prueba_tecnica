@@ -2,13 +2,13 @@ name: Análisis de Código con SonarCloud
 
 on:
   push:
-    branches:  
+    branches:
       - "master"
-      - "main"  
+      - "main"
   pull_request:
     branches:
       - "master"
-      - "main"  
+      - "main"
 
 jobs:
   sonarCloudTrigger:
@@ -23,6 +23,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Verificar versión de Java
+        run: java -version
+
+      - name: Exportar JAVA_HOME
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
 
       - name: Analizar con SonarCloud
         uses: sonarsource/sonarcloud-github-action@v1.3
