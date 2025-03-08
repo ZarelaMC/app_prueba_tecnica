@@ -23,6 +23,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+        #Permisos para permitir ejecución de Jest en GitHub Actions
+      - name: Fix Jest permissions
+        run: chmod +x node_modules/.bin/jest
+
       - name: Run tests and generate coverage
         run: npx jest --coverage #ejecutar Jest sin permisos especiales
 
