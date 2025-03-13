@@ -71,12 +71,12 @@ jobs:
       - name: 🏗️ Copiar archivos del sitio web
         run: |
           mkdir -p build
-          [ -d css ] && cp -r css build/
-          [ -d js ] && cp -r js build/
-          [ -d img ] && cp -r img build/
-          [ -d paginas ] && cp -r paginas build/
-          [ -f pagina.html ] && cp pagina.html build/
-      
+          [ -d APP_PRUEBA_TECNICA/css ] && cp -r APP_PRUEBA_TECNICA/css build/
+          [ -d APP_PRUEBA_TECNICA/js ] && cp -r APP_PRUEBA_TECNICA/js build/
+          [ -d APP_PRUEBA_TECNICA/img ] && cp -r APP_PRUEBA_TECNICA/img build/
+          [ -d APP_PRUEBA_TECNICA/paginas ] && cp -r APP_PRUEBA_TECNICA/paginas build/
+          [ -f APP_PRUEBA_TECNICA/pagina.html ] && cp APP_PRUEBA_TECNICA/pagina.html build/
+
       - name: 🔐 Login en ECR
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
