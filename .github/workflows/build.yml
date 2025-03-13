@@ -119,15 +119,19 @@ jobs:
         with:
           task-definition: ecs/ecs-task-reto2.json
           container-name: reto2-container
-          image: $ECR_REPO:${{ env.IMAGE_TAG }}
+          image: ${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
       - name: 🚀 Desplegar en ECS Fargate
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          service: $SERVICE_NAME
-          cluster: $CLUSTER_NAME
-          task-definition: ${{ steps.render-task.outputs.task-definition }}
+          service: ${{ secrets.SERVICE_NAME }}
+          cluster: ${{ secrets.CLUSTER_NAME }}
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
           wait-for-service-stability: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: 📊 Validar estado del servicio ECS
         run: |
