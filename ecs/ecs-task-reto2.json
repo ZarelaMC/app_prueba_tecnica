@@ -1,7 +1,7 @@
 {
     "family": "ecs-task-reto2-family",
-    "executionRoleArn": "arn:aws:iam::869935102199:role/ecs-task-rol-read-secrets",
     "networkMode": "awsvpc",
+    "executionRoleArn": "arn:aws:iam::869935102199:role/ecs-task-rol-read-secrets",
     "containerDefinitions": [
       {
         "name": "reto2-container",
@@ -21,20 +21,17 @@
           }
         ],
         "logConfiguration": {
-          "logDriver": "awslogs",
-          "options": {
-            "awslogs-group": "/ecs/reto2",
+        "logDriver": "awslogs",
+        "options": {
+            "awslogs-group": "/ecs/reto2-container",
             "awslogs-region": "us-west-2",
             "awslogs-stream-prefix": "ecs"
-          }
+        }
         }
       }
     ],
     "requiresCompatibilities": ["FARGATE"],
     "cpu": "512",
-    "memory": "1024",
-    "runtimePlatform": {
-      "operatingSystemFamily": "LINUX"
-    }
+    "memory": "1024"
   }
   
