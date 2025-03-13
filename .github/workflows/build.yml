@@ -96,10 +96,15 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - name: 📂 Verificar archivos antes del build
+        run: |
+          echo "Contenido del directorio actual:"
+          ls -la
+        
       - name: 🐳 Construir, Etiquetar & Push imágen Docker
         run: |
           IMAGE_TAG=app-$(date +%s)
-          docker build -t ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG -t ${{ secrets.ECR_REPOSITORY }}:latest .
+          docker build -f docker/Dockerfile ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG -t ${{ secrets.ECR_REPOSITORY }}:latest .
           docker push ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG
           docker push ${{ secrets.ECR_REPOSITORY }}:latest
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
