@@ -84,6 +84,10 @@ jobs:
             echo "Archivo pagina.html no encontrado en paginas/"
           fi
 
+      - name: Configurar DNS alternativo
+        run: |
+          echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
+
       - name: 🔐 Login en ECR
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
