@@ -71,11 +71,13 @@ jobs:
       - name: 🏗️ Copiar archivos del sitio web
         run: |
           mkdir -p build
-          [ -d css ] && cp -r css build/
-          [ -d js ] && cp -r js build/
-          [ -d img ] && cp -r img build/
-          [ -d paginas ] && cp -r paginas build/
-          [ -f pagina.html ] && cp pagina.html build/
+          echo "Verificando directorios y archivos..."
+          ls -l
+          if [ -d css ]; then cp -r css build/; else echo "Directorio css no encontrado"; fi
+          if [ -d js ]; then cp -r js build/; else echo "Directorio js no encontrado"; fi
+          if [ -d img ]; then cp -r img build/; else echo "Directorio img no encontrado"; fi
+          if [ -d paginas ]; then cp -r paginas build/; else echo "Directorio paginas no encontrado"; fi
+          if [ -f pagina.html ]; then cp pagina.html build/; else echo "Archivo pagina.html no encontrado"; fi
 
       - name: 🔐 Login en ECR
         run: |
