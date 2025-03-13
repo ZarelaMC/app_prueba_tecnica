@@ -101,7 +101,7 @@ jobs:
           echo "Contenido del directorio actual:"
           ls -la
         
-      - name: 🐳 Construir, Etiquetar & Push imágen Docker
+      - name: 🐳 Construir, Etiquetar & Push imágen Docker - Construye una nueva imágen
         run: |
           IMAGE_TAG=app-$(date +%s)
           docker build -f docker/Dockerfile -t ${{ secrets.ECR_REPOSITORY }}:$IMAGE_TAG -t ${{ secrets.ECR_REPOSITORY }}:latest .
@@ -113,8 +113,8 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ecs-task-definition.json
-          container-name: app-container
+          task-definition: reto2-task.json
+          container-name: reto2-container
           image: ${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
       - name: 📦 Desplegar a ECS Fargate
