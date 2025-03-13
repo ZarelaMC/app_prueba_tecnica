@@ -113,7 +113,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: reto2-task.json
+          task-definition: reto2-task
           container-name: reto2-container
           image: ${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
