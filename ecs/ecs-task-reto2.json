@@ -1,0 +1,40 @@
+{
+    "family": "ecs-task-reto2-family",
+    "executionRoleArn": "arn:aws:iam::869935102199:role/ecs-task-rol-read-secrets",
+    "networkMode": "awsvpc",
+    "containerDefinitions": [
+      {
+        "name": "reto2-container",
+        "image": "REPOSITORY_URI:TAG",  
+        "essential": true,
+        "portMappings": [
+          {
+            "containerPort": 80,
+            "hostPort": 80,
+            "protocol": "tcp"
+          }
+        ],
+        "secrets": [
+          {
+            "name": "API_KEY",
+            "valueFrom": "arn:aws:secretsmanager:us-west-2:869935102199:secret:ci-cd-secrets-o6scGk"
+          }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/reto2",
+            "awslogs-region": "us-west-2",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+      }
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "512",
+    "memory": "1024",
+    "runtimePlatform": {
+      "operatingSystemFamily": "LINUX"
+    }
+  }
+  
