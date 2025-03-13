@@ -77,7 +77,12 @@ jobs:
           if [ -d js ]; then cp -r js build/; else echo "Directorio js no encontrado"; fi
           if [ -d img ]; then cp -r img build/; else echo "Directorio img no encontrado"; fi
           if [ -d paginas ]; then cp -r paginas build/; else echo "Directorio paginas no encontrado"; fi
-          if [ -f pagina.html ]; then cp pagina.html build/; else echo "Archivo pagina.html no encontrado"; fi
+          if [ -f paginas/pagina.html ]; then
+            echo "Copiando pagina.html a build/"
+            cp paginas/pagina.html build/
+          else
+            echo "Archivo pagina.html no encontrado en paginas/"
+          fi
 
       - name: 🔐 Login en ECR
         run: |
