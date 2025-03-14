@@ -157,8 +157,8 @@ jobs:
       - name: 📦 Desplegar a ECS Fargate
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          service: $SERVICE_NAME
-          cluster: $CLUSTER_NAME
+          service: ${{ env.SERVICE_NAME }}
+          cluster: ${{ env.CLUSTER_NAME }}
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           wait-for-service-stability: true
         env:
@@ -170,7 +170,7 @@ jobs:
         run: |
           echo "Esperando que el servicio ECS esté estable..."
           aws ecs wait services-stable \
-          --cluster $CLUSTER_NAME \
-          --services $SERVICE_NAME \
+          --cluster ${{ env.CLUSTER_NAME }} \
+          --services ${{ env.SERVICE_NAME }} \
           --region ${{ secrets.AWS_REGION }}
           echo "✅ Despliegue exitoso en Fargate"
