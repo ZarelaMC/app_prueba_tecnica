@@ -38,11 +38,11 @@ section label {
 }
 
 .formulario {
-	width:96%;
+	width:99%;
 	float:left;
 	font-size:12px;
 	background-color:#C2E9E9;
-	margin:2%;
+	margin:0.5%;
 	border:1px solid #105A7A;
 }
 
