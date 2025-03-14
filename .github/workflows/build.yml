@@ -20,7 +20,8 @@ jobs:
       - name: 🔐 Descargar secretos desde AWS Secrets Manager y protegerlos para que no se impriman
         id: fetch-secrets
         run: |
-          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ci-cd-secrets --query SecretString --output text)
+          export AWS_REGION=${{ env.AWS_REGION }}
+          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ci-cd-secrets --query SecretString --output text --region $AWS_REGION)
           echo "$SECRET_JSON" | jq -r 'to_entries | .[] | "echo ::add-mask::\(.value)\necho \(\.key)=\(.value) >> $GITHUB_ENV"' | bash
 
       - name: 📥 Checkout del repositorio
@@ -71,9 +72,9 @@ jobs:
       - name: 🔐 Descargar secretos desde AWS Secrets Manager y protegerlos para que no se impriman
         id: fetch-secrets
         run: |
-          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ci-cd-secrets --query SecretString --output text)
+          export AWS_REGION=${{ env.AWS_REGION }}
+          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ci-cd-secrets --query SecretString --output text --region $AWS_REGION)
           echo "$SECRET_JSON" | jq -r 'to_entries | .[] | "echo ::add-mask::\(.value)\necho \(\.key)=\(.value) >> $GITHUB_ENV"' | bash
-
 
       - name: 📥 Checkout del repositorio
         uses: actions/checkout@v3
@@ -146,7 +147,7 @@ jobs:
           --cluster $CLUSTER_NAME \
           --services $SERVICE_NAME \
           --region $AWS_REGION
-          
+
       - name: 📈 Monitorear estado del despliegue - Esperar la estabilidad de ECS
         run: |
           echo "Esperando que el servicio ECS esté estable..."
