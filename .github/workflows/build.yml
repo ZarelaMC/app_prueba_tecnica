@@ -92,7 +92,12 @@ jobs:
       - name: 📦 Instalar AWS CLI (para ejecutar comandos AWS) y jq (parsear el JSON que devuelve AWS Secrets Manager)
         run: |
           sudo apt-get update
-          sudo apt-get install -y awscli jq
+          sudo apt-get install -y python3-pip jq
+          pip3 install awscli --upgrade --user
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Verificar versión de AWS CLI
+        run: aws --version
 
       - name: 🔐 Configurar credenciales AWS
         uses: aws-actions/configure-aws-credentials@v2
