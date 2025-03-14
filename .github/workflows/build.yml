@@ -18,10 +18,15 @@ jobs:
       - name: 🛠 Instalar jq
         run: sudo apt-get install jq -y
 
+      - name: 🔐 Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: 🔐 Descargar secretos desde AWS Secrets Manager y protegerlos para que no se impriman
         id: fetch-secrets
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ci-cd-secrets --query SecretString --output text --region $AWS_REGION)
           echo "$SECRET_JSON" | jq -r 'to_entries | .[] | "echo ::add-mask::\(.value)\necho \(\.key)=\(.value) >> $GITHUB_ENV"' | bash
@@ -71,10 +76,15 @@ jobs:
       - name: 🛠 Instalar jq
         run: sudo apt-get install jq -y
 
+      - name: 🔐 Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: 🔐 Descargar secretos desde AWS Secrets Manager y protegerlos para que no se impriman
         id: fetch-secrets
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ci-cd-secrets --query SecretString --output text --region $AWS_REGION)
           echo "$SECRET_JSON" | jq -r 'to_entries | .[] | "echo ::add-mask::\(.value)\necho \(\.key)=\(.value) >> $GITHUB_ENV"' | bash
