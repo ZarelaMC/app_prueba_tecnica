@@ -8,6 +8,8 @@ on:
 
 env:
   NODE_VERSION: 18
+  SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
@@ -15,24 +17,10 @@ jobs:
     name: 📊 Análisis SonarCloud
     runs-on: ubuntu-latest
     steps:
-      - name: 🛠 Instalar jq
-        run: sudo apt-get install jq -y
-
-      - name: 🔐 Configurar credenciales de AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: 🔐 Descargar secretos desde AWS Secrets Manager y protegerlos para que no se impriman
-        id: fetch-secrets
-        run: |
-          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ci-cd-secrets --query SecretString --output text --region $AWS_REGION)
-          echo "$SECRET_JSON" | jq -r 'to_entries | .[] | "echo ::add-mask::\(.value)\necho \(\.key)=\(.value) >> $GITHUB_ENV"' | bash
-
       - name: 📥 Checkout del repositorio
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: 🔧 Configuración Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
@@ -49,8 +37,6 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: ${{ env.SONAR_PROJECT_KEY }}
-          SONAR_ORGANIZATION: ${{ env.SONAR_ORGANIZATION }}
 
       - name: 🛑 Validación de Quality Gate SonarCloud
         id: sonarcloud-check
@@ -73,23 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: sonarqube
     steps:
-      - name: 🛠 Instalar jq
-        run: sudo apt-get install jq -y
-
-      - name: 🔐 Configurar credenciales de AWS
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: 🔐 Descargar secretos desde AWS Secrets Manager y protegerlos para que no se impriman
-        id: fetch-secrets
-        run: |
-          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ci-cd-secrets --query SecretString --output text --region $AWS_REGION)
-          echo "$SECRET_JSON" | jq -r 'to_entries | .[] | "echo ::add-mask::\(.value)\necho \(\.key)=\(.value) >> $GITHUB_ENV"' | bash
-
-      - name: 📥 Checkout del repositorio
+      - name: 📥 Checkout
         uses: actions/checkout@v3
 
       - name: 🔧 Configuración Node.js ${{ env.NODE_VERSION }}
@@ -111,19 +81,51 @@ jobs:
               echo "⚠️ $dir no encontrado"
             fi
           done
-          [ -f paginas/pagina.html ] && cp paginas/pagina.html build/
 
-      - name: 🔐 Configurar credenciales de AWS 
+          if [ -f paginas/pagina.html ]; then
+            cp paginas/pagina.html build/
+            echo "✅ pagina.html copiado"
+          else
+            echo "⚠️ pagina.html no encontrada"
+          fi
+
+      - name: 📦 Instalar AWS CLI (para ejecutar comandos AWS) y jq (parsear el JSON que devuelve AWS Secrets Manager)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli jq
+
+      - name: 🔐 Configurar credenciales AWS
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔐 Obtener secretos desde AWS Secrets Manager
+        id: get-secrets
+        run: |
+          echo "Recuperando secretos..."
+          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ci-cd-secrets --region $AWS_REGION | jq -r .SecretString)
+
+          ECR_REPO=$(echo $SECRET_JSON | jq -r .ECR_REPOSITORY)
+          CLUSTER_NAME=$(echo $SECRET_JSON | jq -r .CLUSTER_NAME)
+          SERVICE_NAME=$(echo $SECRET_JSON | jq -r .SERVICE_NAME)
+
+          echo "ECR_REPO=$ECR_REPO" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=$CLUSTER_NAME" >> $GITHUB_ENV
+          echo "SERVICE_NAME=$SERVICE_NAME" >> $GITHUB_ENV
+  
+      - name: 🔐 Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: 🔐 Login en Amazon ECR
         run: |
-          aws ecr get-login-password --region $AWS_REGION 
-          | docker login --username AWS --password-stdin $ECR_REPOSITORY
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+            | docker login --username AWS --password-stdin $ECR_REPO
 
       - name: 📂 Verificar archivos en el directorio raíz antes del build
         run: |
@@ -133,9 +135,9 @@ jobs:
       - name: 🐳 Construir, Etiquetar & Push imágen Docker - Construye una nueva imágen
         run: |
           IMAGE_TAG=app-$(date +%Y%m%d)
-          docker build -f docker/Dockerfile -t $ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REPOSITORY:latest .
-          docker push $ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REPOSITORY:latest
+          docker build -f docker/Dockerfile -t $ECR_REPO:$IMAGE_TAG -t $ECR_REPO:latest .
+          docker push $ECR_REPO:$IMAGE_TAG
+          docker push $ECR_REPO:latest
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: 📄 Actualizar Task Definition
@@ -144,28 +146,25 @@ jobs:
         with:
           task-definition: ecs/ecs-task-reto2.json
           container-name: reto2-container
-          image: ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          image: $ECR_REPO:${{ env.IMAGE_TAG }}
 
       - name: 📦 Desplegar a ECS Fargate
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          service: ${{ env.SERVICE_NAME }}
-          cluster: ${{ env.CLUSTER_NAME }}
+          service: $SERVICE_NAME
+          cluster: $CLUSTER_NAME
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           wait-for-service-stability: true
-
-      - name: 📈 Esperar servicio ECS estable
-        run: |
-          aws ecs wait services-stable \
-          --cluster $CLUSTER_NAME \
-          --services $SERVICE_NAME \
-          --region $AWS_REGION
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: 📈 Monitorear estado del despliegue - Esperar la estabilidad de ECS
         run: |
           echo "Esperando que el servicio ECS esté estable..."
           aws ecs wait services-stable \
-          --cluster ${{ env.CLUSTER_NAME }} \
-          --services ${{ env.SERVICE_NAME }} \
-          --region ${{ env.AWS_REGION }}
+          --cluster $CLUSTER_NAME \
+          --services $SERVICE_NAME \
+          --region ${{ secrets.AWS_REGION }}
           echo "✅ Despliegue exitoso en Fargate"
